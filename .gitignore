@@ -1,0 +1,6 @@
+﻿vendor/
+.idea/
+dbdata/
+.env
+*.log
+app/runtime/

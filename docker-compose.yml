@@ -1,0 +1,38 @@
+services:
+  php:
+    build: ./docker/php
+    container_name: bs-php
+    volumes:
+      - ./app:/var/www/html
+    environment:
+      - YII_ENV=prod
+      - DB_DSN=mysql:host=mysql;dbname=build_store
+      - DB_USER=build_user
+      - DB_PASS=build_pass
+      - API_BEARER_TOKEN=CHANGE_ME_SECRET
+    depends_on: [mysql]
+
+  nginx:
+    image: nginx:1.27-alpine
+    container_name: bs-nginx
+    ports:
+      - "80:80"
+    volumes:
+      - ./app:/var/www/html
+      - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on: [php]
+
+  mysql:
+    image: mysql:8.0
+    container_name: bs-mysql
+    environment:
+      MYSQL_DATABASE: build_store
+      MYSQL_USER: build_user
+      MYSQL_PASSWORD: build_pass
+      MYSQL_ROOT_PASSWORD: rootpass
+    volumes:
+      - dbdata:/var/lib/mysql
+      - ./docker/mysql/my.cnf:/etc/mysql/conf.d/my.cnf:ro
+
+volumes:
+  dbdata:
