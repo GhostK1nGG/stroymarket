@@ -4,80 +4,105 @@ namespace app\controllers;
 use Yii;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
-use app\models\Product;
+use yii\filters\VerbFilter;
+use app\repositories\ProductRepository;
 
 class ProductController extends Controller
 {
-    public $enableCsrfValidation = false; // API
+    public $enableCsrfValidation = false;
+
+    private ProductRepository $repo;
+
+    public function init()
+    {
+        parent::init();
+        $this->repo = new ProductRepository();
+    }
+
+    public function behaviors()
+    {
+        $b = parent::behaviors();
+        $b['verbs'] = [
+            'class' => VerbFilter::class,
+            'actions' => [
+                'index'  => ['GET'],
+                'view'   => ['GET'],
+                'create' => ['POST'],   // FormData
+                'update' => ['PUT'],    // JSON
+                'patch'  => ['PATCH'],  // JSON
+                'delete' => ['DELETE'],
+            ],
+        ];
+        return $b;
+    }
 
     // GET /products
     public function actionIndex()
     {
-        return Product::find()->all();
+        return $this->repo->findAll();
     }
 
     // GET /products/{id}
     public function actionView($id)
     {
-        return $this->find($id);
+        $m = $this->repo->findById((int)$id);
+        if (!$m) $this->notFound();
+        return $m;
     }
 
-    // POST /products  (FormData)
+    // POST /products (FormData)
     public function actionCreate()
     {
-        $model = new Product();
-        $model->load(Yii::$app->request->post(), ''); // FormData
-        if ($model->validate() && $model->save()) {
+        [$ok, $m, $errors] = $this->repo->create(Yii::$app->request->post());
+        if ($ok) {
             Yii::$app->response->statusCode = 201;
-            return $model;
+            return $m;
         }
         Yii::$app->response->statusCode = 422;
-        return ['errors' => $model->getErrors()];
+        return ['errors' => $errors];
     }
 
     // PUT /products/{id} (JSON)
     public function actionUpdate($id)
     {
-        $model = $this->find($id);
-        $data = Yii::$app->request->bodyParams; // JSON
-        $model->load($data, '');
-        if ($model->validate() && $model->save()) {
-            return $model;
-        }
+        $m = $this->repo->findById((int)$id);
+        if (!$m) $this->notFound();
+
+        $data = Yii::$app->request->bodyParams;
+        [$ok, $m, $errors] = $this->repo->update($m, $data);
+        if ($ok) return $m;
+
         Yii::$app->response->statusCode = 422;
-        return ['errors' => $model->getErrors()];
+        return ['errors' => $errors];
     }
 
     // PATCH /products/{id} (JSON)
     public function actionPatch($id)
     {
-        $model = $this->find($id);
+        $m = $this->repo->findById((int)$id);
+        if (!$m) $this->notFound();
+
         $data = Yii::$app->request->bodyParams;
-        foreach ($data as $attr => $val) {
-            if ($model->hasAttribute($attr)) $model->$attr = $val;
-        }
-        if ($model->validate() && $model->save(false)) {
-            return $model;
-        }
+        [$ok, $m, $errors] = $this->repo->patch($m, $data);
+        if ($ok) return $m;
+
         Yii::$app->response->statusCode = 422;
-        return ['errors' => $model->getErrors()];
+        return ['errors' => $errors];
     }
 
     // DELETE /products/{id}
     public function actionDelete($id)
     {
-        $model = $this->find($id);
-        $model->delete();
+        $m = $this->repo->findById((int)$id);
+        if (!$m) $this->notFound();
+
+        $this->repo->delete($m);
         return ['status' => 'ok'];
     }
 
-    private function find($id)
+    private function notFound(): void
     {
-        $m = Product::findOne($id);
-        if (!$m) {
-            Yii::$app->response->statusCode = 404;
-            throw new NotFoundHttpException('Продукт не найден');
-        }
-        return $m;
+        Yii::$app->response->statusCode = 404;
+        throw new NotFoundHttpException('Продукт не найден');
     }
 }

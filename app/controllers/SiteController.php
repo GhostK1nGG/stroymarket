@@ -12,9 +12,6 @@ use app\models\ContactForm;
 
 class SiteController extends Controller
 {
-    /**
-     * {@inheritdoc}
-     */
     public function behaviors()
     {
         return [
@@ -38,9 +35,6 @@ class SiteController extends Controller
         ];
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function actions()
     {
         return [
@@ -52,6 +46,16 @@ class SiteController extends Controller
                 'fixedVerifyCode' => YII_ENV_TEST ? 'testme' : null,
             ],
         ];
+    }
+    public function actionSpa()
+    {
+        \Yii::$app->response->format = \yii\web\Response::FORMAT_RAW;
+        \Yii::$app->response->headers->set('Content-Type', 'text/html; charset=UTF-8');
+        return <<<'HTML'
+<!doctype html><meta charset="utf-8"><title>StroyMarket SPA</title>
+<div id="app"></div>
+<script type="module" src="/spa/app.js"></script>
+HTML;
     }
 
     /**

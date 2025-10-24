@@ -1,5 +1,5 @@
 <?php
-
+//не запускает , ток возвр массив настроек
 $params = require __DIR__ . '/params.php';
 $db = require __DIR__ . '/db.php';
 
@@ -14,23 +14,23 @@ $config = [
     'components' => [
         'request' => [
             'cookieValidationKey' => '-EMLvAdLYxckT6tQxJhrS7MuDkCBaVpB',
-            // важное: позволяем принимать JSON-тела (для PUT/PATCH)
+            // позволяем принимать JSON-тела (для PUT/PATCH)
             'parsers' => [
                 'application/json' => 'yii\web\JsonParser',
             ],
         ],
-        // все ответы — в JSON
         'response' => [
             'format' => \yii\web\Response::FORMAT_JSON,
         ],
         'cache' => [
             'class' => 'yii\caching\FileCache',
         ],
-        // сессии/логин нам сейчас не нужны, но оставим как есть — не мешают
+        // сессии/логин
         'user' => [
             'identityClass' => 'app\models\User',
             'enableAutoLogin' => true,
         ],
+        //то куда отдаем ошибки
         'errorHandler' => [
             'errorAction' => 'site/error',
         ],
@@ -50,14 +50,13 @@ $config = [
         ],
         'db' => $db,
 
-        // включаем красивые URL и наши API-правила
         'urlManager' => [
             'enablePrettyUrl' => true,
             'showScriptName' => false,
             'rules' => [
-                // Product CRUD:
                 'GET products'                 => 'product/index',   // список
                 'GET products/<id:\d+>'        => 'product/view',    // один
+                'GET spa'                      => 'site/spa',
                 'POST products'                => 'product/create',  // создание (FormData)
                 'PUT products/<id:\d+>'        => 'product/update',  // полное обновление (JSON)
                 'PATCH products/<id:\d+>'      => 'product/patch',   // частичное обновление (JSON)
@@ -81,5 +80,4 @@ if (YII_ENV_DEV) {
         // 'allowedIPs' => ['127.0.0.1', '::1'],
     ];
 }
-
 return $config;

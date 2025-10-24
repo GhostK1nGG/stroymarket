@@ -1,4 +1,5 @@
 <?php
+//описание данных и их проверка
 namespace app\models;
 
 use yii\db\ActiveRecord;

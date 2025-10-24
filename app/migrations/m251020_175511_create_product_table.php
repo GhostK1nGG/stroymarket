@@ -1,5 +1,5 @@
 <?php
-
+//создание табл
 use yii\db\Migration;
 
 /**
@@ -7,9 +7,6 @@ use yii\db\Migration;
  */
 class m251020_175511_create_product_table extends Migration
 {
-    /**
-     * {@inheritdoc}
-     */
     public function safeUp()
     {
         $this->createTable('{{%product}}', [
