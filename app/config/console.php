@@ -26,6 +26,11 @@ $config = [
             ],
         ],
         'db' => $db,
+
+        // 👇 добавили, чтобы в консоли можно было обращаться к тому же репозиторию, что и в web
+        'productRepository' => [
+            'class' => \app\repositories\ProductRepository::class,
+        ],
     ],
     'params' => $params,
     /*
