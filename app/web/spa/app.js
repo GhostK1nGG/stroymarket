@@ -1,165 +1,77 @@
-// app/web/spa/app.js
+// web/spa/app.js (ЛР2, моки, без API)
 
-// ====== настройки ======
-// у тебя контроллер обслуживает /products
-const PRODUCTS_URL = '/products';
+import { bus } from './state/bus.js';
+import { getAll, getById, create, update, remove } from './services/products.mock.js';
+import { ProductList } from './components/ProductList.js';
+import { ProductForm } from './components/ProductForm.js';
+import { Banner } from './components/Banner.js';
 
-// если API закрыт — впиши сюда токен
-// const AUTH_TOKEN = 'Bearer CHANGE_ME_SECRET';
-const AUTH_TOKEN = null;
+function init() {
+  const listRoot = document.getElementById('items-list');
+  const formElement = document.getElementById('item-form');
+  const bannerRoot = document.getElementById('banner');
+  const totalCountEl = document.getElementById('total-count');
 
-// ====== состояние ======
-let items = [];
-let selectedId = null;
+  const list = new ProductList(listRoot);
+  const form = new ProductForm(formElement);
+  // создаём баннер, он сам подпишется на события
+  // eslint-disable-next-line no-unused-vars
+  const banner = new Banner(bannerRoot);
 
-// ====== HTTP ======
-async function apiGet(url) {
-  const headers = {};
-  if (AUTH_TOKEN) headers['Authorization'] = AUTH_TOKEN;
-
-  const res = await fetch(url, { headers });
-  if (!res.ok) {
-    throw new Error('GET ' + url + ' → ' + res.status);
+  function refreshList() {
+    const items = getAll();
+    list.render(items);
+    totalCountEl.textContent = String(items.length);
   }
-  return res.json();
-}
 
-async function apiPostForm(url, formData) {
-  const headers = {};
-  if (AUTH_TOKEN) headers['Authorization'] = AUTH_TOKEN;
-
-  const res = await fetch(url, {
-    method: 'POST',
-    headers,
-    body: formData,
-  });
-  if (!res.ok) {
-    const text = await res.text();
-    throw new Error('POST ' + url + ' → ' + res.status + ' ' + text);
-  }
-  return res.json();
-}
-
-async function apiPutJson(url, data) {
-  const headers = { 'Content-Type': 'application/json' };
-  if (AUTH_TOKEN) headers['Authorization'] = AUTH_TOKEN;
-
-  const res = await fetch(url, {
-    method: 'PUT',
-    headers,
-    body: JSON.stringify(data),
-  });
-  if (!res.ok) {
-    const text = await res.text();
-    throw new Error('PUT ' + url + ' → ' + res.status + ' ' + text);
-  }
-  return res.json();
-}
-
-async function apiDelete(url) {
-  const headers = {};
-  if (AUTH_TOKEN) headers['Authorization'] = AUTH_TOKEN;
-
-  const res = await fetch(url, {
-    method: 'DELETE',
-    headers,
-  });
-  if (!res.ok) {
-    const text = await res.text();
-    throw new Error('DELETE ' + url + ' → ' + res.status + ' ' + text);
-  }
-  return true;
-}
-
-// ====== список ======
-const listCallbacks = {
-  onSelect: (id) => selectItem(id),
-  onEdit: (item) => window.SPA_Form.fill(item),
-  onDelete: (id) => removeItem(id),
-};
-
-function renderAll() {
-  window.SPA_List.render(items, selectedId, listCallbacks);
-  const current = items.find((i) => i.id === selectedId) || null;
-  window.SPA_Details.render(current);
-}
-
-function selectItem(id) {
-  selectedId = id;
-  renderAll();
-}
-
-// ====== загрузка с бэка ======
-async function loadProducts() {
-  const data = await apiGet(PRODUCTS_URL);
-  // вдруг вернётся {items:[...]}
-  items = Array.isArray(data) ? data : data.items || [];
-  // если выбранного id больше нет (например, удалили) — сбрасываем
-  if (selectedId && !items.find((i) => i.id === selectedId)) {
-    selectedId = null;
-  }
-  renderAll();
-}
-
-// ====== создание ======
-async function createProduct(data) {
-  const fd = new FormData();
-  fd.append('name', data.name);
-  fd.append('sku', data.sku);
-  fd.append('price', data.price);
-  fd.append('category', data.category || '');
-  fd.append('description', data.description || '');
-
-  await apiPostForm(PRODUCTS_URL, fd);
-  // ВАЖНО: после успешного POST ещё раз забираем всё из БД
-  await loadProducts();
-}
-
-// ====== обновление ======
-async function updateProduct(data) {
-  const url = PRODUCTS_URL + '/' + data.id;
-  await apiPutJson(url, {
-    name: data.name,
-    sku: data.sku,
-    price: data.price,
-    category: data.category,
-    description: data.description,
-  });
-  // тоже перечитываем с бэка — чтобы взять уже обновлённую версию
-  selectedId = data.id;
-  await loadProducts();
-}
-
-// ====== удаление ======
-async function removeItem(id) {
-  if (!confirm('Удалить товар #' + id + '?')) return;
-  const url = PRODUCTS_URL + '/' + id;
-  await apiDelete(url);
-  // после удаления тоже перечитаем
-  selectedId = null;
-  await loadProducts();
-}
-
-// ====== инициализация формы ======
-window.SPA_Form.init(async (data) => {
-  try {
-    if (data.id) {
-      await updateProduct(data);
-      window.SPA_Form.clear();
-    } else {
-      await createProduct(data);
-      window.SPA_Form.clear();
+  // Создание товара
+  bus.on('product:create', (data) => {
+    try {
+      create(data);
+      refreshList();
+      form.clear();
+      bus.emit('banner:info', 'Товар успешно создан');
+    } catch (e) {
+      bus.emit('banner:error', e.message || 'Ошибка при создании товара');
     }
-  } catch (err) {
-    console.error(err);
-    alert('Ошибка сохранения: ' + err.message);
-  }
-});
-
-// ====== старт ======
-window.addEventListener('DOMContentLoaded', () => {
-  loadProducts().catch((err) => {
-    console.error(err);
-    alert('Не удалось загрузить товары с API');
   });
-});
+
+  // Обновление товара
+  bus.on('product:update', (data) => {
+    try {
+      update(data.id, data);
+      refreshList();
+      form.clear();
+      bus.emit('banner:info', 'Товар успешно обновлён');
+    } catch (e) {
+      bus.emit('banner:error', e.message || 'Ошибка при обновлении товара');
+    }
+  });
+
+  // Запрос на редактирование — просто заполняем форму
+  bus.on('product:editRequest', (id) => {
+    const product = getById(id);
+    if (!product) {
+      bus.emit('banner:error', 'Товар не найден');
+      return;
+    }
+    form.fill(product);
+    bus.emit('banner:info', 'Режим редактирования товара');
+  });
+
+  // Удаление товара
+  bus.on('product:deleteRequest', (id) => {
+    try {
+      remove(id);
+      refreshList();
+      bus.emit('banner:info', 'Товар удалён');
+    } catch (e) {
+      bus.emit('banner:error', e.message || 'Ошибка при удалении товара');
+    }
+  });
+
+  // первый рендер списка
+  refreshList();
+}
+
+document.addEventListener('DOMContentLoaded', init);

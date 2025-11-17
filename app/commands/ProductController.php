@@ -10,15 +10,21 @@ use app\models\Product;
  * Консольные команды для работы с товарами.
  *
  * Примеры:
+ *   php yii product/list
+ *   php yii product/create
+ *   php yii product/update 3
+ *   php yii product/delete 3
+ *
+ * Если используешь Docker:
  *   docker compose exec php php yii product/list
- *   docker compose exec php php yii product/create
- *   docker compose exec php php yii product/update 3
- *   docker compose exec php php yii product/delete 3
  */
 class ProductController extends Controller
 {
     /**
      * Вывести список товаров
+     *
+     * Команда:
+     *   php yii product/list
      */
     public function actionList()
     {
@@ -44,12 +50,14 @@ class ProductController extends Controller
 
     /**
      * Создать товар (интерактивно)
+     *
+     * Команда:
+     *   php yii product/create
      */
     public function actionCreate()
     {
         $model = new Product();
 
-        // обязательные поля — мы их знаем точно
         $model->name = $this->prompt('Название:', ['required' => true]);
         $model->sku = $this->prompt('Артикул (sku):', ['required' => true]);
         $model->price = $this->prompt('Цена:', [
@@ -77,6 +85,10 @@ class ProductController extends Controller
 
     /**
      * Обновить товар по id
+     *
+     * Команда:
+     *   php yii product/update 3
+     *
      * @param int $id
      */
     public function actionUpdate($id)
@@ -120,7 +132,11 @@ class ProductController extends Controller
     }
 
     /**
-     * Удалить товар
+     * Удалить товар по id
+     *
+     * Команда:
+     *   php yii product/delete 3
+     *
      * @param int $id
      */
     public function actionDelete($id)

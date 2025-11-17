@@ -1,76 +1,54 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8">
-  <title>ЛР2 — SPA «Строительный магазин»</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="stylesheet" href="/spa/style.css">
+  <meta charset="UTF-8" />
+  <title>ЛР2 — Products SPA (моки)</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <div class="app">
-    <header class="topbar">
-      <div class="logo">СтройМаркет · ЛР2</div>
-      <div class="subtitle">моки в памяти · список · форма · просмотр</div>
-    </header>
+<h1>Управление товарами (ЛР2, моки)</h1>
 
-    <main class="layout">
-      <section class="panel">
-        <div class="panel-header">
-          <h2>Товары</h2>
-          <small id="total-count">0 шт.</small>
-        </div>
-        <div id="items-list" class="items-list"></div>
-      </section>
+<!-- Плашка для сообщений -->
+<div id="banner" class="banner banner--hidden"></div>
 
-      <section class="side">
-        <div class="card" id="form-card">
-          <h2 id="form-title">Создание товара</h2>
-          <form id="item-form" class="form">
-            <input type="hidden" id="item-id">
-            <label class="field">
-              <span>Название *</span>
-              <input type="text" id="item-name" required>
-            </label>
-	    <label class="field">
-  	      <span>Артикул (sku) *</span>
-              <input type="text" id="item-sku" required>
-            </label>
-            <div id="form-error" class="form-error" style="display:none;"></div>
+<main class="layout">
+  <!-- Список товаров -->
+  <section class="card">
+    <h2>Товары (<span id="total-count">0</span>)</h2>
+    <ul id="items-list" class="items-list"></ul>
+  </section>
 
-            <label class="field">
-              <span>Цена *</span>
-              <input type="number" id="item-price" min="0" step="0.01" required>
-            </label>
-            <label class="field">
-              <span>Категория</span>
-              <input type="text" id="item-category">
-            </label>
-            <label class="field">
-              <span>Описание</span>
-              <textarea id="item-description" rows="3"></textarea>
-            </label>
-            <div class="actions">
-              <button type="submit" class="btn primary" id="save-btn">Создать</button>
-              <button type="button" class="btn ghost" id="reset-btn">Очистить</button>
-            </div>
-          </form>
-        </div>
+  <!-- Форма товара -->
+  <section class="card">
+    <h2>Форма товара</h2>
+    <form id="item-form" class="item-form">
+      <input type="hidden" id="field-id" name="id" />
 
-        <div class="card" id="details-card">
-          <h2>Информация о товаре</h2>
-          <div id="details-content" class="details-empty">
-            Выберите товар слева.
-          </div>
-        </div>
-      </section>
-    </main>
-  </div>
+      <label class="field">
+        <span>Название *</span>
+        <input id="field-name" name="name" type="text" />
+      </label>
 
-  <!-- порядок важен -->
-  <script src="/spa/data.js"></script>
-  <script src="/spa/list.js"></script>
-  <script src="/spa/form.js"></script>
-  <script src="/spa/details.js"></script>
-  <script src="/spa/app.js"></script>
+      <label class="field">
+        <span>Артикул (SKU) *</span>
+        <input id="field-sku" name="sku" type="text" />
+      </label>
+
+      <label class="field">
+        <span>Цена *</span>
+        <input id="field-price" name="price" type="number" step="0.01" />
+      </label>
+
+      <div class="form-buttons">
+        <button type="submit">Сохранить</button>
+        <button type="reset">Очистить форму</button>
+      </div>
+    </form>
+  </section>
+</main>
+
+<!-- Точка входа SPA -->
+<!-- 2лр app.js -->
+<script type="module" src="./app_api.js"></script>
 </body>
 </html>
