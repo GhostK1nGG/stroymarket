@@ -223,3 +223,76 @@ button.danger {
   color: #fff;
   border: 1px solid #b71c1c;
 }
+
+/* ЛР 2.8: авторизация + защищённые товары */
+.container {
+  padding: 16px;
+}
+
+.auth-panel,
+.panel {
+  background: #fff;
+  border-radius: 8px;
+  padding: 16px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+  margin-bottom: 16px;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 12px;
+}
+
+.form-grid label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.form-grid input {
+  padding: 8px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+}
+
+.row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.row.space-between {
+  justify-content: space-between;
+}
+
+.row.gap {
+  gap: 8px;
+}
+
+.error {
+  color: #b00020;
+  margin-bottom: 8px;
+}
+
+.table {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 12px;
+}
+
+.table-row {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  align-items: center;
+  padding: 8px;
+  background: #fafafa;
+  border: 1px solid #eaeaea;
+  border-radius: 6px;
+}
+
+.table-row.header {
+  background: #efefef;
+  font-weight: 600;
+}

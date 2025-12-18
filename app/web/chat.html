@@ -8,48 +8,99 @@
         body { font-family: sans-serif; margin: 20px; }
         #messages { border: 1px solid #ccc; padding: 10px; height: 240px; overflow-y: auto; margin-bottom: 10px; }
         .log { color: #888; font-size: 12px; }
+        .field-row { margin-bottom: 10px; }
     </style>
 </head>
 <body>
-    <h1>Тест чата (WebSocket)</h1>
-    <p class="log">Сервер: ws://localhost:8080</p>
-    <div id="messages"></div>
-    <form id="chat-form">
-        <input id="message-input" type="text" placeholder="Введите сообщение" required autocomplete="off" style="width:70%;" />
-        <button type="submit">Отправить</button>
-    </form>
+<h1>Тест чата (WebSocket)</h1>
+<p class="log">Сервер: ws://localhost:8080</p>
 
-    <script>
-        const log = (text) => {
-            const wrapper = document.createElement('div');
-            wrapper.className = 'log';
-            wrapper.textContent = text;
-            document.getElementById('messages').appendChild(wrapper);
+<div class="field-row">
+    <label>
+        Имя:
+        <input id="username-input" type="text" placeholder="Ваше имя" autocomplete="off" />
+    </label>
+</div>
+
+<div id="messages"></div>
+
+<form id="chat-form">
+    <input
+            id="message-input"
+            type="text"
+            placeholder="Введите сообщение"
+            required
+            autocomplete="off"
+            style="width:70%;"
+    />
+    <button type="submit">Отправить</button>
+</form>
+
+<script>
+    const messagesEl = document.getElementById('messages');
+    const form = document.getElementById('chat-form');
+    const input = document.getElementById('message-input');
+    const usernameInput = document.getElementById('username-input');
+
+    const log = (text) => {
+        const wrapper = document.createElement('div');
+        wrapper.className = 'log';
+        wrapper.textContent = text;
+        messagesEl.appendChild(wrapper);
+        messagesEl.scrollTop = messagesEl.scrollHeight;
+    };
+
+    const addMessage = (text) => {
+        const wrapper = document.createElement('div');
+        wrapper.textContent = text;
+        messagesEl.appendChild(wrapper);
+        messagesEl.scrollTop = messagesEl.scrollHeight;
+    };
+
+    const socket = new WebSocket('ws://localhost:8080');
+
+    socket.addEventListener('open', () => log('Подключено к серверу'));
+    socket.addEventListener('close', () => log('Соединение закрыто'));
+    socket.addEventListener('error', () => log('Ошибка соединения'));
+
+    // получаем сообщения от сервера
+    socket.addEventListener('message', (event) => {
+        const raw = event.data;
+        try {
+            const data = JSON.parse(raw);
+            // ожидаем формат { user: 'Имя', text: 'Сообщение' }
+            if (data && typeof data === 'object' && data.user && data.text) {
+                addMessage(`${data.user}: ${data.text}`);
+            } else {
+                addMessage(raw);
+            }
+        } catch (e) {
+            // если это не JSON, просто показываем как есть
+            addMessage(raw);
+        }
+    });
+
+    // отправка сообщения
+    form.addEventListener('submit', (event) => {
+        event.preventDefault();
+        const text = input.value.trim();
+        if (!text) return;
+
+        const user = usernameInput.value.trim() || 'Аноним';
+
+        const payload = {
+            user,
+            text,
         };
 
-        const addMessage = (text) => {
-            const wrapper = document.createElement('div');
-            wrapper.textContent = text;
-            document.getElementById('messages').appendChild(wrapper);
-            document.getElementById('messages').scrollTop = document.getElementById('messages').scrollHeight;
-        };
+        // отправляем JSON на сервер
+        socket.send(JSON.stringify(payload));
 
-        const socket = new WebSocket('ws://localhost:8080');
-        const form = document.getElementById('chat-form');
-        const input = document.getElementById('message-input');
+        // локально показываем, что это наше сообщение
+        addMessage(`Вы (${user}): ${text}`);
 
-        socket.addEventListener('open', () => log('Подключено к серверу'));
-        socket.addEventListener('close', () => log('Соединение закрыто'));
-        socket.addEventListener('error', () => log('Ошибка соединения'));
-        socket.addEventListener('message', (event) => addMessage(event.data));
-
-        form.addEventListener('submit', (event) => {
-            event.preventDefault();
-            if (!input.value.trim()) return;
-            socket.send(input.value.trim());
-            addMessage(`Вы: ${input.value.trim()}`);
-            input.value = '';
-        });
-    </script>
+        input.value = '';
+    });
+</script>
 </body>
 </html>

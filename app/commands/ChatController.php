@@ -22,6 +22,11 @@ class ChatController extends Controller
      */
     public function actionRun($port = 8080)
     {
+        // Сохраняем текущий уровень отчётности об ошибках
+        $prevLevel = error_reporting();
+        // Отключаем только DEPRECATED, остальное (warnings, notices, fatal) остаётся
+        error_reporting($prevLevel & ~E_DEPRECATED & ~E_USER_DEPRECATED);
+
         $this->stdout("Запуск WebSocket-сервера на порту {$port}\n");
 
         $server = IoServer::factory(
@@ -31,7 +36,13 @@ class ChatController extends Controller
             (int) $port
         );
 
-        $server->run();
+        try {
+            // Бесконечный цикл — команда "висит", это нормально
+            $server->run();
+        } finally {
+            // Возвращаем исходный уровень error_reporting на всякий случай
+            error_reporting($prevLevel);
+        }
 
         return ExitCode::OK;
     }
