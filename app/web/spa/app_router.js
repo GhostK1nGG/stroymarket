@@ -96,6 +96,7 @@ const router = window.ReactRouterDOM.createBrowserRouter([
       {
         path: '/chat',
         element: React.createElement(ChatPage),
+
       },
     ],
   },
