@@ -1,5 +1,6 @@
 const React = window.React;
 const { useEffect, useMemo, useState } = React;
+
 import { ProductApiService } from '../services/products.api.js';
 
 export function ProductsPage() {
