@@ -43,75 +43,77 @@ async function handleResponse(res) {
   return data;
 }
 
-// GET /products – список товаров
-export async function getAll() {
-  const res = await fetch(BASE_URL, {
-    method: 'GET',
-    headers: {
-      'Accept': 'application/json',
-    },
-  });
+export class ProductApiService {
+  // GET /products – список товаров
+  async getAll() {
+    const res = await fetch(BASE_URL, {
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json',
+      },
+    });
 
-  return handleResponse(res); // вернёт массив продуктов
-}
+    return handleResponse(res); // вернёт массив продуктов
+  }
 
-// GET /products/{id} – один товар
-export async function getById(id) {
-  const res = await fetch(`${BASE_URL}/${id}`, {
-    method: 'GET',
-    headers: {
-      'Accept': 'application/json',
-    },
-  });
+  // GET /products/{id} – один товар
+  async getById(id) {
+    const res = await fetch(`${BASE_URL}/${id}`, {
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json',
+      },
+    });
 
-  return handleResponse(res); // вернёт один продукт
-}
+    return handleResponse(res); // вернёт один продукт
+  }
 
-// POST /products – создать (FormData, как в ЛР1)
-export async function create(data) {
-  const formData = new FormData();
-  formData.append('name', data.name);
-  formData.append('sku', data.sku);
-  formData.append('price', String(data.price));
-  // при желании можно добавить category/description, если добавишь в модель
+  // POST /products – создать (FormData, как в ЛР1)
+  async create(data) {
+    const formData = new FormData();
+    formData.append('name', data.name);
+    formData.append('sku', data.sku);
+    formData.append('price', String(data.price));
+    // при желании можно добавить category/description, если добавишь в модель
 
-  const res = await fetch(BASE_URL, {
-    method: 'POST',
-    body: formData,
-  });
+    const res = await fetch(BASE_URL, {
+      method: 'POST',
+      body: formData,
+    });
 
-  return handleResponse(res); // вернёт созданный продукт
-}
+    return handleResponse(res); // вернёт созданный продукт
+  }
 
-// PUT /products/{id} – полное обновление (JSON)
-export async function update(id, data) {
-  const payload = {
-    name: data.name,
-    sku: data.sku,
-    price: Number(data.price),
-  };
+  // PUT /products/{id} – полное обновление (JSON)
+  async update(id, data) {
+    const payload = {
+      name: data.name,
+      sku: data.sku,
+      price: Number(data.price),
+    };
 
-  const res = await fetch(`${BASE_URL}/${id}`, {
-    method: 'PUT',
-    headers: {
-      'Content-Type': 'application/json',
-      'Accept': 'application/json',
-    },
-    body: JSON.stringify(payload),
-  });
+    const res = await fetch(`${BASE_URL}/${id}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+      body: JSON.stringify(payload),
+    });
 
-  return handleResponse(res); // вернёт обновлённый продукт
-}
+    return handleResponse(res); // вернёт обновлённый продукт
+  }
 
-// DELETE /products/{id} – удаление
-export async function remove(id) {
-  const res = await fetch(`${BASE_URL}/${id}`, {
-    method: 'DELETE',
-    headers: {
-      'Accept': 'application/json',
-    },
-  });
+  // DELETE /products/{id} – удаление
+  async remove(id) {
+    const res = await fetch(`${BASE_URL}/${id}`, {
+      method: 'DELETE',
+      headers: {
+        'Accept': 'application/json',
+      },
+    });
 
-  // нам неважно, что там вернётся, главное – без ошибки
-  await handleResponse(res);
+    // нам неважно, что там вернётся, главное – без ошибки
+    await handleResponse(res);
+  }
 }

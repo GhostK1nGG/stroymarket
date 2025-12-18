@@ -2,103 +2,100 @@
 
 namespace app\models;
 
-class User extends \yii\base\BaseObject implements \yii\web\IdentityInterface
+use Yii;
+use yii\db\ActiveRecord;
+use yii\web\IdentityInterface;
+
+class User extends ActiveRecord implements IdentityInterface
 {
-    public $id;
-    public $username;
-    public $password;
-    public $authKey;
-    public $accessToken;
+    public static function tableName()
+    {
+        return '{{%user}}';
+    }
 
-    private static $users = [
-        '100' => [
-            'id' => '100',
-            'username' => 'admin',
-            'password' => 'admin',
-            'authKey' => 'test100key',
-            'accessToken' => '100-token',
-        ],
-        '101' => [
-            'id' => '101',
-            'username' => 'demo',
-            'password' => 'demo',
-            'authKey' => 'test101key',
-            'accessToken' => '101-token',
-        ],
-    ];
+    public function rules()
+    {
+        return [
+            [['email', 'password_hash', 'api_token'], 'required'],
+            ['email', 'email'],
+            ['email', 'string', 'max' => 255],
+            ['email', 'unique'],
+            [['password_hash'], 'string', 'max' => 255],
+            [['api_token'], 'string', 'max' => 64],
+            [['api_token'], 'unique'],
+            [['auth_key'], 'string', 'max' => 32],
+            [['created_at', 'updated_at'], 'integer'],
+        ];
+    }
 
+    public function fields()
+    {
+        return ['id', 'email', 'created_at', 'updated_at'];
+    }
 
-    /**
-     * {@inheritdoc}
-     */
     public static function findIdentity($id)
     {
-        return isset(self::$users[$id]) ? new static(self::$users[$id]) : null;
+        return static::findOne($id);
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public static function findIdentityByAccessToken($token, $type = null)
     {
-        foreach (self::$users as $user) {
-            if ($user['accessToken'] === $token) {
-                return new static($user);
-            }
-        }
-
-        return null;
+        return static::findOne(['api_token' => $token]);
     }
 
-    /**
-     * Finds user by username
-     *
-     * @param string $username
-     * @return static|null
-     */
-    public static function findByUsername($username)
+    public static function findByEmail(string $email): ?self
     {
-        foreach (self::$users as $user) {
-            if (strcasecmp($user['username'], $username) === 0) {
-                return new static($user);
-            }
-        }
-
-        return null;
+        return static::findOne(['email' => $email]);
     }
 
-    /**
-     * {@inheritdoc}
-     */
+    public static function findByUsername(string $username): ?self
+    {
+        return static::findByEmail($username);
+    }
+
     public function getId()
     {
         return $this->id;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getAuthKey()
     {
-        return $this->authKey;
+        return $this->auth_key;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function validateAuthKey($authKey)
     {
-        return $this->authKey === $authKey;
+        return $this->auth_key === $authKey;
     }
 
-    /**
-     * Validates password
-     *
-     * @param string $password password to validate
-     * @return bool if password provided is valid for current user
-     */
-    public function validatePassword($password)
+    public function validatePassword(string $password): bool
     {
-        return $this->password === $password;
+        return Yii::$app->security->validatePassword($password, $this->password_hash);
+    }
+
+    public function setPassword(string $password): void
+    {
+        $this->password_hash = Yii::$app->security->generatePasswordHash($password);
+    }
+
+    public function refreshApiToken(): void
+    {
+        $this->api_token = Yii::$app->security->generateRandomString(32);
+    }
+
+    public function beforeSave($insert)
+    {
+        if ($this->isNewRecord && empty($this->api_token)) {
+            $this->refreshApiToken();
+        }
+        if ($this->isNewRecord && empty($this->auth_key)) {
+            $this->auth_key = Yii::$app->security->generateRandomString(32);
+        }
+        $time = time();
+        if ($insert && empty($this->created_at)) {
+            $this->created_at = $time;
+        }
+        $this->updated_at = $time;
+        return parent::beforeSave($insert);
     }
 }
