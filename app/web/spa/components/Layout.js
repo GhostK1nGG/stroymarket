@@ -1,7 +1,6 @@
-const React = window.React;
-const { NavLink, Outlet } = window.ReactRouterDOM;
-
 export function Layout() {
+  const React = window.React;
+  const { NavLink, Outlet } = window.ReactRouterDOM;
   return React.createElement(
     'div',
     { className: 'layout-shell' },
