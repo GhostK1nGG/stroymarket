@@ -1,11 +1,9 @@
-// app_api.js — ЛР3: SPA, работающая с реальным API Yii2
-
-import { App } from './components/App.js';
+import { AppApi } from './components/AppApi.js';
 import { ProductApiService } from './services/products.api.js';
 import { bus } from './state/bus.js';
 
 function init() {
-  const app = new App({
+  const app = new AppApi({
     listRoot: document.getElementById('items-list'),
     formElement: document.getElementById('item-form'),
     bannerRoot: document.getElementById('banner'),
