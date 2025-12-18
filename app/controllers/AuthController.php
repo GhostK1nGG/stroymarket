@@ -24,9 +24,27 @@ class AuthController extends Controller
         return $b;
     }
 
+    private function readPayload(): array
+    {
+        $payload = Yii::$app->request->getBodyParams();
+        if (empty($payload)) {
+            $raw = Yii::$app->request->getRawBody();
+            if ($raw) {
+                $decoded = json_decode($raw, true);
+                if (is_array($decoded)) {
+                    $payload = $decoded;
+                }
+            }
+        }
+        if (empty($payload)) {
+            $payload = Yii::$app->request->post();
+        }
+        return is_array($payload) ? $payload : [];
+    }
+
     public function actionRegister()
     {
-        $payload = Yii::$app->request->bodyParams ?: Yii::$app->request->post();
+        $payload = $this->readPayload();
         $email = trim((string)($payload['email'] ?? ''));
         $password = (string)($payload['password'] ?? '');
         $passwordRepeat = (string)($payload['password_repeat'] ?? '');
@@ -69,12 +87,13 @@ class AuthController extends Controller
 
     public function actionLogin()
     {
-        $payload = Yii::$app->request->bodyParams ?: Yii::$app->request->post();
+        $payload = $this->readPayload();
         $email = trim((string)($payload['email'] ?? ''));
         $password = (string)($payload['password'] ?? '');
 
         $user = $email ? User::findByEmail($email) : null;
-        if (!$user || !$user->validatePassword($password)) {
+        $validPassword = $user && $password !== '' && $user->validatePassword($password);
+        if (!$user || !$validPassword) {
             Yii::$app->response->statusCode = 401;
             return ['error' => 'Неверный email или пароль'];
         }
