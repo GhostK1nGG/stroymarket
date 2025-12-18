@@ -1,5 +1,5 @@
-import React from 'https://esm.sh/react@18.2.0';
-import { NavLink, Outlet } from 'https://esm.sh/react-router-dom@6.22.3';
+const React = window.React;
+const { NavLink, Outlet } = window.ReactRouterDOM;
 
 export function Layout() {
   return React.createElement(

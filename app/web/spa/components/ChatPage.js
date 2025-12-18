@@ -1,4 +1,5 @@
-import React, { useEffect, useRef, useState } from 'https://esm.sh/react@18.2.0';
+const React = window.React;
+const { useEffect, useRef, useState } = React;
 
 export function ChatPage() {
   const socketRef = useRef(null);

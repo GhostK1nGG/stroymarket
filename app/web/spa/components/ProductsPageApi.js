@@ -1,4 +1,6 @@
-import React, { useEffect, useMemo, useState } from 'https://esm.sh/react@18.2.0';
+const React = window.React;
+const { useEffect, useMemo, useState } = React;
+
 import { ProductApiService } from '../services/products.api.js';
 
 export function ProductsPage() {
