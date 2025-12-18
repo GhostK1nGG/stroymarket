@@ -1,7 +1,12 @@
 {
     "name": "yiisoft/yii2-app-basic",
     "description": "Yii 2 Basic Project Template",
-    "keywords": ["yii2", "framework", "basic", "project template"],
+    "keywords": [
+        "yii2",
+        "framework",
+        "basic",
+        "project template"
+    ],
     "homepage": "https://www.yiiframework.com/",
     "type": "project",
     "license": "BSD-3-Clause",
@@ -15,6 +20,7 @@
     "minimum-stability": "stable",
     "require": {
         "php": ">=7.4.0",
+        "cboden/ratchet": "^0.4.4",
         "yiisoft/yii2": "~2.0.45",
         "yiisoft/yii2-bootstrap5": "~2.0.2",
         "yiisoft/yii2-symfonymailer": "~2.0.3"
@@ -32,12 +38,13 @@
     },
     "config": {
         "allow-plugins": {
-            "yiisoft/yii2-composer" : true
+            "yiisoft/yii2-composer": true
         },
         "process-timeout": 1800,
         "fxp-asset": {
             "enabled": false
-        }
+        },
+        "secure-http": true
     },
     "scripts": {
         "post-install-cmd": [
@@ -67,7 +74,7 @@
     "repositories": [
         {
             "type": "composer",
-            "url": "https://asset-packagist.org"
+            "url": "https://repo.packagist.org"
         }
     ]
 }
