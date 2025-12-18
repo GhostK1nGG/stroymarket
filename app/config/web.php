@@ -61,6 +61,14 @@ $config = [
                 'PUT products/<id:\d+>'        => 'product/update',  // полное обновление (JSON)
                 'PATCH products/<id:\d+>'      => 'product/patch',   // частичное обновление (JSON)
                 'DELETE products/<id:\d+>'     => 'product/delete',  // удаление
+                'POST auth/register'           => 'auth/register',
+                'POST auth/login'              => 'auth/login',
+                'GET secure-products'          => 'protected-product/index',
+                'GET secure-products/<id:\d+>' => 'protected-product/view',
+                'POST secure-products'         => 'protected-product/create',
+                'PUT secure-products/<id:\d+>' => 'protected-product/update',
+                'PATCH secure-products/<id:\d+>' => 'protected-product/patch',
+                'DELETE secure-products/<id:\d+>' => 'protected-product/delete',
             ],
         ],
     ],

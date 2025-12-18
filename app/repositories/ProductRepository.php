@@ -10,15 +10,36 @@ class ProductRepository
         return Product::find()->all();
     }
 
+    public function findAllByUser(int $userId): array
+    {
+        return Product::find()->where(['user_id' => $userId])->all();
+    }
+
     public function findById(int $id): ?Product
     {
         return Product::findOne($id);
+    }
+
+    public function findByIdForUser(int $id, int $userId): ?Product
+    {
+        return Product::find()->where(['id' => $id, 'user_id' => $userId])->one();
     }
 
     public function create(array $data): array
     {
         $m = new Product();
         $m->load($data, '');
+        if ($m->validate() && $m->save()) {
+            return [true, $m, null];
+        }
+        return [false, null, $m->getErrors()];
+    }
+
+    public function createForUser(array $data, int $userId): array
+    {
+        $m = new Product();
+        $m->load($data, '');
+        $m->user_id = $userId;
         if ($m->validate() && $m->save()) {
             return [true, $m, null];
         }
