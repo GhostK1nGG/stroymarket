@@ -1,5 +1,3 @@
-// app_api.js — ЛР3: SPA, работающая с реальным API Yii2
-
 import { AppApi } from './components/AppApi.js';
 import { ProductApiService } from './services/products.api.js';
 import { bus } from './state/bus.js';
