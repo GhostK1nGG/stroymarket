@@ -5,53 +5,65 @@ const initialProducts = [
   { id: 3, name: 'Песок карьерный', sku: 'SAND-01', price: 200 },
 ];
 
-// "Текущие" данные в ОЗУ — с ними и работаем
-let products = [...initialProducts];
-
-export function getAll() {
-  return products;
-}
-
-export function getById(id) {
-  return products.find((p) => p.id === id) || null;
-}
-
-export function create(data) {
-  const maxId = products.length ? Math.max(...products.map((p) => p.id)) : 0;
-  const id = maxId + 1;
-
-  const product = {
-    id,
-    name: data.name,
-    sku: data.sku,
-    price: Number(data.price),
-  };
-
-  products.push(product);
-  return product;
-}
-
-export function update(id, data) {
-  const index = products.findIndex((p) => p.id === id);
-  if (index === -1) {
-    throw new Error('Товар не найден');
+export class MockProductService {
+  constructor(seed = initialProducts) {
+    this.initialProducts = seed;
+    this.reset();
   }
 
-  products[index] = {
-    ...products[index],
-    name: data.name,
-    sku: data.sku,
-    price: Number(data.price),
-  };
+  reset() {
+    this.products = [...this.initialProducts];
+  }
 
-  return products[index];
-}
+  getAll() {
+    return this.products;
+  }
 
-export function remove(id) {
-  const before = products.length;
-  products = products.filter((p) => p.id !== id);
+  getById(id) {
+    const product = this.products.find((p) => p.id === id);
+    if (!product) {
+      throw new Error('Товар не найден');
+    }
+    return product;
+  }
 
-  if (products.length === before) {
-    throw new Error('Товар не найден');
+  create(data) {
+    const maxId = this.products.length ? Math.max(...this.products.map((p) => p.id)) : 0;
+    const id = maxId + 1;
+
+    const product = {
+      id,
+      name: data.name,
+      sku: data.sku,
+      price: Number(data.price),
+    };
+
+    this.products.push(product);
+    return product;
+  }
+
+  update(id, data) {
+    const index = this.products.findIndex((p) => p.id === id);
+    if (index === -1) {
+      throw new Error('Товар не найден');
+    }
+
+    this.products[index] = {
+      ...this.products[index],
+      name: data.name,
+      sku: data.sku,
+      price: Number(data.price),
+    };
+
+    return this.products[index];
+  }
+
+  remove(id) {
+    const before = this.products.length;
+    this.products = this.products.filter((p) => p.id !== id);
+
+    if (this.products.length === before) {
+      throw new Error('Товар не найден');
+    }
   }
 }
